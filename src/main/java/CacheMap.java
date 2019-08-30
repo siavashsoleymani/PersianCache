@@ -1,28 +1,27 @@
 import java.util.*;
 
 public class CacheMap extends HashMap<String, String> {
-    private final PersianCacheContext persianCacheContext;
+    private final Interactor interactor;
     private final String name;
 
-    protected CacheMap(PersianCacheContext update, String name) {
+    protected CacheMap(Interactor interactor, String name) {
         super();
-        this.persianCacheContext = update;
+        this.interactor = interactor;
         this.name = name;
     }
 
     @Override
-    public String remove(Object o) {
-        if (Objects.nonNull(this.get(o)))
-            persianCacheContext.remove(o, name);
-        return super.remove(o);
+    public String remove(Object key) {
+        if (Objects.nonNull(this.get(key)))
+            interactor.remove(key, name);
+        return super.remove(key);
     }
 
     @Override
-    public String put(String s, String s2) {
-        if (Objects.isNull(this.get(s)))
-            persianCacheContext.put(s, s2, name);
-        if (Objects.nonNull(this.get(s)) && !this.get(s).equals(s2))
-            persianCacheContext.put(s, s2, name);
-        return super.put(s, s2);
+    public String put(String key, String value) {
+        if (Objects.isNull(this.get(key)) ||
+                (Objects.nonNull(this.get(key)) && !this.get(key).equals(value)))
+            interactor.put(key, value, name);
+        return super.put(key, value);
     }
 }
