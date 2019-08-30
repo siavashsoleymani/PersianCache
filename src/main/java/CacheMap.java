@@ -24,4 +24,12 @@ public class CacheMap extends HashMap<String, String> {
             interactor.put(key, value, name);
         return super.put(key, value);
     }
+
+    public String networkPut(String key, String value) {
+        return super.put(key, value);
+    }
+
+    public String networkRemove(Object key) {
+        return super.remove(key);
+    }
 }

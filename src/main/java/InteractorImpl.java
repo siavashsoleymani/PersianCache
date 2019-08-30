@@ -52,7 +52,7 @@ public class InteractorImpl implements Interactor {
         String key = subscriber.recvStr(0);
         CacheMap cacheMap = caches.get(name);
         if (Objects.nonNull(cacheMap)) {
-            cacheMap.remove(key);
+            cacheMap.networkRemove(key);
         }
     }
 
@@ -62,7 +62,7 @@ public class InteractorImpl implements Interactor {
         String value = subscriber.recvStr(0);
         CacheMap cacheMap = caches.get(name);
         if (Objects.nonNull(cacheMap)) {
-            cacheMap.put(key, value);
+            cacheMap.networkPut(key, value);
         }
     }
 
