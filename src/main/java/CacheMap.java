@@ -29,7 +29,7 @@ public class CacheMap extends HashMap<String, String> {
         return super.put(key, value);
     }
 
-    public String networkRemove(Object key) {
+    public String networkR1emove(Object key) {
         return super.remove(key);
     }
 }
