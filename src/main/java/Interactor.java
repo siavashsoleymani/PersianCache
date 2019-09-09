@@ -6,4 +6,7 @@ public interface Interactor {
     void startInteract();
 
     CacheMap getCacheMap(String name);
+
+    void fillCacheMapForFirstTime();
+
 }

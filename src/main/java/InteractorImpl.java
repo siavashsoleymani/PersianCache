@@ -10,11 +10,14 @@ public class InteractorImpl implements Interactor {
 
     private final ZMQ.Socket publisher;
     private final ZMQ.Socket subscriber;
+    private final ZMQ.Socket requester;
+
     private static Map<String, CacheMap> caches = new HashMap<>();
 
-    public InteractorImpl(ZMQ.Socket publisher, ZMQ.Socket subscriber) {
+    public InteractorImpl(ZMQ.Socket publisher, ZMQ.Socket subscriber, ZMQ.Socket requester) {
         this.publisher = publisher;
         this.subscriber = subscriber;
+        this.requester = requester;
     }
 
     public void put(String i, String r, String name) {
@@ -74,5 +77,22 @@ public class InteractorImpl implements Interactor {
         cacheMap = new CacheMap(this, name);
         caches.put(name, cacheMap);
         return cacheMap;
+    }
+
+    @Override
+    public void fillCacheMapForFirstTime() {
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.submit(() -> {
+            requester.send("hello".getBytes(), 0);
+            while (requester.hasReceiveMore()) {
+                String name = requester.recvStr(0);
+                String key = requester.recvStr(0);
+                String value = requester.recvStr(0);
+                CacheMap cacheMap = caches.get(name);
+                if (Objects.isNull(cacheMap))
+                    cacheMap = new CacheMap(this, name);
+                cacheMap.put(key, value);
+            }
+        });
     }
 }
