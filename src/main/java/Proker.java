@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -5,6 +6,7 @@ import org.zeromq.ZMQ;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.zeromq.ZMQ.SNDMORE;
 
@@ -15,6 +17,7 @@ public class Proker {
     private static String lastValue = "";
     private static String lastKey = "";
     private static Map<String, HashMap<String, String>> caches = new HashMap<>();
+    private static Gson gson = new Gson();
 
     public static void main(String[] args) {
         try (ZContext context = new ZContext()) {
@@ -66,16 +69,12 @@ public class Proker {
 
                 if (items.pollin(2)) {
                     while (true) {
-                        message = sub.recv(0);
+                        message = rep.recv(0);
                         String messageStr = new String(message);
                         if (messageStr.equals("hello")) {
-                            caches.forEach((n, c) -> {
-                                c.forEach((k, v) -> {
-                                    rep.send(n.getBytes(), SNDMORE);
-                                    rep.send(k.getBytes(), SNDMORE);
-                                    rep.send(v.getBytes(), 0);
-                                });
-                            });
+                            String cacheStr = gson.toJson(caches);
+                            rep.send(cacheStr.getBytes(), 0);
+                            break;
                         }
                     }
                 }

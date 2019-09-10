@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.zeromq.ZMQ;
 
 import java.util.HashMap;
@@ -13,6 +15,7 @@ public class InteractorImpl implements Interactor {
     private final ZMQ.Socket requester;
 
     private static Map<String, CacheMap> caches = new HashMap<>();
+    private static Gson gson = new Gson();
 
     public InteractorImpl(ZMQ.Socket publisher, ZMQ.Socket subscriber, ZMQ.Socket requester) {
         this.publisher = publisher;
@@ -83,15 +86,13 @@ public class InteractorImpl implements Interactor {
     public void fillCacheMapForFirstTime() {
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.submit(() -> {
-            requester.send("hello".getBytes(), 0);
-            while (requester.hasReceiveMore()) {
-                String name = requester.recvStr(0);
-                String key = requester.recvStr(0);
-                String value = requester.recvStr(0);
-                CacheMap cacheMap = caches.get(name);
-                if (Objects.isNull(cacheMap))
-                    cacheMap = new CacheMap(this, name);
-                cacheMap.put(key, value);
+            while (true) {
+                requester.send("hello".getBytes(), 0);
+                String message = requester.recvStr(0);
+                Map<String, CacheMap> cacheFromNetwork =
+                        gson.fromJson(message, new TypeToken<Map<String, CacheMap>>(){}.getType());
+                caches.putAll(cacheFromNetwork);
+                break;
             }
         });
     }
