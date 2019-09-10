@@ -2,9 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.zeromq.ZMQ;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -90,10 +88,23 @@ public class InteractorImpl implements Interactor {
                 requester.send("hello".getBytes(), 0);
                 String message = requester.recvStr(0);
                 Map<String, CacheMap> cacheFromNetwork =
-                        gson.fromJson(message, new TypeToken<Map<String, CacheMap>>(){}.getType());
+                        gson.fromJson(message, new TypeToken<Map<String, CacheMap>>() {
+                        }.getType());
                 caches.putAll(cacheFromNetwork);
+                appendMapBtoMapA(caches, cacheFromNetwork);
                 break;
             }
         });
+    }
+
+    public void appendMapBtoMapA(Map<String,CacheMap> a, Map<String,CacheMap> b) {
+        for (Map.Entry<String, CacheMap> bEntry : b.entrySet()) {
+            CacheMap aValue = a.get(bEntry.getKey());
+            if (aValue != null) {
+                aValue.putAll(bEntry.getValue());
+            } else {
+                a.put(bEntry.getKey(), bEntry.getValue());
+            }
+        }
     }
 }
