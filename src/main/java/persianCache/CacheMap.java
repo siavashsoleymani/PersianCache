@@ -1,19 +1,25 @@
-import java.util.*;
+package persianCache;
 
-public class CacheMap extends HashMap<String, String> {
-    private final Interactor interactor;
+import gateWay.GateWay;
+import service.CacheMapService;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CacheMap extends ConcurrentHashMap<String, String> {
+    private final CacheMapService cacheMapService;
     private final String name;
 
-    protected CacheMap(Interactor interactor, String name) {
+    public CacheMap(CacheMapService cacheMapService, String name) {
         super();
-        this.interactor = interactor;
+        this.cacheMapService = cacheMapService;
         this.name = name;
     }
 
     @Override
     public String remove(Object key) {
         if (Objects.nonNull(this.get(key)))
-            interactor.remove(key, name);
+            cacheMapService.sendRemoveMessage(key, name);
         return super.remove(key);
     }
 
@@ -21,7 +27,7 @@ public class CacheMap extends HashMap<String, String> {
     public String put(String key, String value) {
         if (Objects.isNull(this.get(key)) ||
                 (Objects.nonNull(this.get(key)) && !this.get(key).equals(value)))
-            interactor.put(key, value, name);
+            cacheMapService.sendPutMessage(key, value, name);
         return super.put(key, value);
     }
 

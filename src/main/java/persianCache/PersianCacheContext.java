@@ -1,6 +1,12 @@
+package persianCache;
+
+import gateWay.GateWay;
+import gateWay.impl.GateWayImpl;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
+import service.CacheMapService;
+import service.impl.CacheMapServiceImpl;
 
 import java.util.Objects;
 
@@ -10,9 +16,13 @@ public class PersianCacheContext {
     private static ZMQ.Socket requester;
     private static ZContext zContext;
     private static PersianCacheContext INSTANCE = null;
-    private static Interactor interactor = null;
+    private static GateWay gateWay = null;
+    private static CacheMapService cacheMapService;
 
     private PersianCacheContext() {
+        if (Objects.nonNull(INSTANCE)) {
+            throw new IllegalStateException();
+        }
         zContext = new ZContext();
         publisher = zContext.createSocket(SocketType.PUB);
         subscriber = zContext.createSocket(SocketType.SUB);
@@ -21,23 +31,28 @@ public class PersianCacheContext {
         subscriber.connect("tcp://localhost:8081");
         requester.connect("tcp://localhost:8082");
         subscriber.subscribe("".getBytes(ZMQ.CHARSET));
-        interactor = new InteractorImpl(publisher, subscriber, requester);
+        gateWay = new GateWayImpl(subscriber, requester, publisher);
+        cacheMapService = new CacheMapServiceImpl(publisher, subscriber);
         fillCacheMapForFirstTime();
         startInteracting();
     }
 
-    private void fillCacheMapForFirstTime() {
-        interactor.fillCacheMapForFirstTime();
-    }
-
     public static CacheMap getCacheMap(String name) {
-        if (Objects.isNull(INSTANCE))
-            INSTANCE = new PersianCacheContext();
-        CacheMap cacheMap = interactor.getCacheMap(name);
+        initialize();
+        CacheMap cacheMap = cacheMapService.getCacheMap(name);
         return cacheMap;
     }
 
+    public static void initialize() {
+        if (Objects.isNull(INSTANCE))
+            INSTANCE = new PersianCacheContext();
+    }
+
+    private void fillCacheMapForFirstTime() {
+        gateWay.fillCacheMapForFirstTime();
+    }
+
     private void startInteracting() {
-        interactor.startInteract();
+        gateWay.startInteract();
     }
 }
