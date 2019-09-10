@@ -90,7 +90,6 @@ public class InteractorImpl implements Interactor {
                 Map<String, CacheMap> cacheFromNetwork =
                         gson.fromJson(message, new TypeToken<Map<String, CacheMap>>() {
                         }.getType());
-                caches.putAll(cacheFromNetwork);
                 appendMapBtoMapA(caches, cacheFromNetwork);
                 break;
             }
