@@ -20,9 +20,8 @@ public class PersianCacheContext {
     private static CacheMapService cacheMapService;
 
     private PersianCacheContext() {
-        if (Objects.nonNull(INSTANCE)) {
+        if (Objects.nonNull(INSTANCE))
             throw new IllegalStateException();
-        }
         zContext = new ZContext();
         publisher = zContext.createSocket(SocketType.PUB);
         subscriber = zContext.createSocket(SocketType.SUB);
@@ -54,5 +53,23 @@ public class PersianCacheContext {
 
     private void startInteracting() {
         gateWay.startInteract();
+    }
+
+    public static ZMQ.Socket getPublisher() {
+        if (Objects.isNull(INSTANCE))
+            throw new IllegalStateException("First initialize PersianContext");
+        return publisher;
+    }
+
+    public static ZMQ.Socket getSubscriber() {
+        if (Objects.isNull(INSTANCE))
+            throw new IllegalStateException("First initialize PersianContext");
+        return subscriber;
+    }
+
+    public static ZMQ.Socket getRequester() {
+        if (Objects.isNull(INSTANCE))
+            throw new IllegalStateException("First initialize PersianContext");
+        return requester;
     }
 }

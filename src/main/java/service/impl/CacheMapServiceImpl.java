@@ -21,21 +21,6 @@ public class CacheMapServiceImpl implements CacheMapService {
     }
 
     @Override
-    public void sendPutMessage(String key, String value, String name) {
-        publisher.send("pt", ZMQ.SNDMORE);
-        publisher.send(name, ZMQ.SNDMORE);
-        publisher.send(key, ZMQ.SNDMORE);
-        publisher.send(value, 0);
-    }
-
-    @Override
-    public void sendRemoveMessage(Object o, String name) {
-        publisher.send("rm", ZMQ.SNDMORE);
-        publisher.send(name, ZMQ.SNDMORE);
-        publisher.send(o.toString(), 0);
-    }
-
-    @Override
     public void removeFromLocalCacheMap() {
         String name = subscriber.recvStr(0);
         String key = subscriber.recvStr(0);
@@ -61,7 +46,7 @@ public class CacheMapServiceImpl implements CacheMapService {
         CacheMap cacheMap = caches.get(name);
         if (Objects.nonNull(cacheMap))
             return cacheMap;
-        cacheMap = new CacheMap(this, name);
+        cacheMap = new CacheMap(name);
         caches.put(name, cacheMap);
         return cacheMap;
     }

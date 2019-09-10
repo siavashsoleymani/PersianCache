@@ -1,25 +1,35 @@
 package persianCache;
 
 import gateWay.GateWay;
+import gateWay.impl.GateWayImpl;
 import service.CacheMapService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheMap extends ConcurrentHashMap<String, String> {
-    private final CacheMapService cacheMapService;
+    private final GateWay gateWay;
     private final String name;
 
-    public CacheMap(CacheMapService cacheMapService, String name) {
+    public CacheMap(GateWay gateWay, String name) {
         super();
-        this.cacheMapService = cacheMapService;
+        this.gateWay = gateWay;
         this.name = name;
     }
+
+    public CacheMap(String name) {
+        super();
+        this.gateWay = new GateWayImpl(PersianCacheContext.getSubscriber(),
+                PersianCacheContext.getRequester(),
+                PersianCacheContext.getPublisher());
+        this.name = name;
+    }
+
 
     @Override
     public String remove(Object key) {
         if (Objects.nonNull(this.get(key)))
-            cacheMapService.sendRemoveMessage(key, name);
+            gateWay.sendRemoveMessage(key, name);
         return super.remove(key);
     }
 
@@ -27,7 +37,7 @@ public class CacheMap extends ConcurrentHashMap<String, String> {
     public String put(String key, String value) {
         if (Objects.isNull(this.get(key)) ||
                 (Objects.nonNull(this.get(key)) && !this.get(key).equals(value)))
-            cacheMapService.sendPutMessage(key, value, name);
+            gateWay.sendPutMessage(key, value, name);
         return super.put(key, value);
     }
 

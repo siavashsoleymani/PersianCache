@@ -60,4 +60,20 @@ public class GateWayImpl implements GateWay {
             }
         });
     }
+
+    @Override
+    public void sendPutMessage(String key, String value, String name) {
+        publisher.send("pt", ZMQ.SNDMORE);
+        publisher.send(name, ZMQ.SNDMORE);
+        publisher.send(key, ZMQ.SNDMORE);
+        publisher.send(value, 0);
+    }
+
+    @Override
+    public void sendRemoveMessage(Object o, String name) {
+        publisher.send("rm", ZMQ.SNDMORE);
+        publisher.send(name, ZMQ.SNDMORE);
+        publisher.send(o.toString(), 0);
+    }
+
 }
