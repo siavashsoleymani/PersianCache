@@ -10,13 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheMapServiceImpl implements CacheMapService {
 
-    private final ZMQ.Socket publisher;
     private final ZMQ.Socket subscriber;
 
     private static Map<String, CacheMap> caches = new ConcurrentHashMap<>();
 
-    public CacheMapServiceImpl(ZMQ.Socket publisher, ZMQ.Socket subscriber) {
-        this.publisher = publisher;
+    public CacheMapServiceImpl(ZMQ.Socket subscriber) {
         this.subscriber = subscriber;
     }
 

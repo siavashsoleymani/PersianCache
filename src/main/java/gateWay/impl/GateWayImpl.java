@@ -25,7 +25,7 @@ public class GateWayImpl implements GateWay {
         this.subscriber = subscriber;
         this.requester = requester;
         this.publisher = publisher;
-        this.cacheMapService = new CacheMapServiceImpl(this.publisher, this.subscriber);
+        this.cacheMapService = new CacheMapServiceImpl(this.subscriber);
     }
 
     @Override

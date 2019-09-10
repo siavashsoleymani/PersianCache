@@ -31,7 +31,7 @@ public class PersianCacheContext {
         requester.connect("tcp://localhost:8082");
         subscriber.subscribe("".getBytes(ZMQ.CHARSET));
         gateWay = new GateWayImpl(subscriber, requester, publisher);
-        cacheMapService = new CacheMapServiceImpl(publisher, subscriber);
+        cacheMapService = new CacheMapServiceImpl(subscriber);
         fillCacheMapForFirstTime();
         startInteracting();
     }
