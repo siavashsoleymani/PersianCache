@@ -6,9 +6,9 @@ import java.util.Map;
 
 public interface CacheMapService {
 
-    void removeFromLocalCacheMap();
+    void removeFromLocalCacheMap(String name, String key);
 
-    void putToLocalCacheMap();
+    void putToLocalCacheMap(String s, String name, String key);
 
     CacheMap getCacheMap(String name);
 

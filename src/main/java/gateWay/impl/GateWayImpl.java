@@ -8,7 +8,8 @@ import persianCache.CacheMap;
 import service.CacheMapService;
 import service.impl.CacheMapServiceImpl;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,7 +26,7 @@ public class GateWayImpl implements GateWay {
         this.subscriber = subscriber;
         this.requester = requester;
         this.publisher = publisher;
-        this.cacheMapService = new CacheMapServiceImpl(this.subscriber);
+        this.cacheMapService = new CacheMapServiceImpl();
     }
 
     @Override
@@ -36,9 +37,14 @@ public class GateWayImpl implements GateWay {
                 String recv = subscriber.recvStr(0);
                 if (Objects.nonNull(recv)) {
                     if (recv.equals("pt")) {
-                        cacheMapService.putToLocalCacheMap();
+                        String name = subscriber.recvStr(0);
+                        String key = subscriber.recvStr(0);
+                        String value = subscriber.recvStr(0);
+                        cacheMapService.putToLocalCacheMap(name, key, value);
                     } else if (recv.equals("rm")) {
-                        cacheMapService.removeFromLocalCacheMap();
+                        String name = subscriber.recvStr(0);
+                        String key = subscriber.recvStr(0);
+                        cacheMapService.removeFromLocalCacheMap(name, key);
                     }
                 }
             }

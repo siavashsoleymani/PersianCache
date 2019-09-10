@@ -1,6 +1,5 @@
 package service.impl;
 
-import org.zeromq.ZMQ;
 import persianCache.CacheMap;
 import service.CacheMapService;
 
@@ -10,18 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheMapServiceImpl implements CacheMapService {
 
-    private final ZMQ.Socket subscriber;
-
     private static Map<String, CacheMap> caches = new ConcurrentHashMap<>();
 
-    public CacheMapServiceImpl(ZMQ.Socket subscriber) {
-        this.subscriber = subscriber;
-    }
-
     @Override
-    public void removeFromLocalCacheMap() {
-        String name = subscriber.recvStr(0);
-        String key = subscriber.recvStr(0);
+    public void removeFromLocalCacheMap(String name, String key) {
         CacheMap cacheMap = caches.get(name);
         if (Objects.nonNull(cacheMap)) {
             cacheMap.networkRemove(key);
@@ -29,10 +20,7 @@ public class CacheMapServiceImpl implements CacheMapService {
     }
 
     @Override
-    public void putToLocalCacheMap() {
-        String name = subscriber.recvStr(0);
-        String key = subscriber.recvStr(0);
-        String value = subscriber.recvStr(0);
+    public void putToLocalCacheMap(String name, String key, String value) {
         CacheMap cacheMap = caches.get(name);
         if (Objects.nonNull(cacheMap)) {
             cacheMap.networkPut(key, value);

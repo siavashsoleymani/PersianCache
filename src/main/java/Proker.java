@@ -6,7 +6,6 @@ import org.zeromq.ZMQ;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.zeromq.ZMQ.SNDMORE;
 

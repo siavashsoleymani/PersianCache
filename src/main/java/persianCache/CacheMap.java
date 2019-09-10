@@ -2,9 +2,8 @@ package persianCache;
 
 import gateWay.GateWay;
 import gateWay.impl.GateWayImpl;
-import service.CacheMapService;
 
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheMap extends ConcurrentHashMap<String, String> {
