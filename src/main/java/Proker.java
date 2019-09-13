@@ -15,8 +15,8 @@ public class Proker {
     private static String lastName = "";
     private static String lastValue = "";
     private static String lastKey = "";
-    private static Map<String, HashMap<String, String>> caches = new HashMap<>();
-    private static Gson gson = new Gson();
+    private static final Map<String, Map<String, String>> caches = new HashMap<>();
+    private static final Gson gson = new Gson();
 
     public static void main(String[] args) {
         try (ZContext context = new ZContext()) {
@@ -41,19 +41,16 @@ public class Proker {
                 items.poll();
 
                 if (items.pollin(0)) {
-                    while (true) {
+                    do {
                         message = pub.recv(0);
                         more = pub.hasReceiveMore();
                         sub.send(message, more ? SNDMORE : 0);
-                        if (!more) {
-                            break;
-                        }
-                    }
+                    } while (more);
                 }
 
                 if (items.pollin(1)) {
                     int i = 0;
-                    while (true) {
+                    do {
                         message = sub.recv(0);
                         more = sub.hasReceiveMore();
                         updateValues(message, i);
@@ -63,7 +60,7 @@ public class Proker {
                             updateCache();
                             break;
                         }
-                    }
+                    } while (true);
                 }
 
                 if (items.pollin(2)) {
@@ -83,13 +80,13 @@ public class Proker {
 
     private static void updateCache() {
         if (lastJob.equals("pt")) {
-            HashMap cache = caches.get(lastName);
+            Map<String, String> cache = caches.get(lastName);
             if (Objects.isNull(cache))
-                caches.put(lastName, new HashMap());
+                caches.put(lastName, new HashMap<>());
             cache = caches.get(lastName);
             cache.put(lastKey, lastValue);
         } else if (lastJob.equals("rm")) {
-            HashMap cache = caches.get(lastName);
+            Map<String, String> cache = caches.get(lastName);
             if (Objects.isNull(cache))
                 return;
             cache.remove(lastKey);

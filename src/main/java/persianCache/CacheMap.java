@@ -34,10 +34,12 @@ public class CacheMap extends ConcurrentHashMap<String, String> {
         return super.put(key, value);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public String networkPut(String key, String value) {
         return super.put(key, value);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public String networkRemove(Object key) {
         return super.remove(key);
     }

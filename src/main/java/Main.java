@@ -3,6 +3,7 @@ import persianCache.PersianCacheContext;
 
 import java.util.Random;
 
+@SuppressWarnings({"InfiniteLoopStatement"})
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         CacheMap first = PersianCacheContext.getCacheMap("first");

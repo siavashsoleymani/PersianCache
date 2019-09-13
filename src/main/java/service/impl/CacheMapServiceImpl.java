@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheMapServiceImpl implements CacheMapService {
 
-    private static Map<String, CacheMap> caches = new ConcurrentHashMap<>();
+    private static final Map<String, CacheMap> caches = new ConcurrentHashMap<>();
 
     @Override
     public void removeFromLocalCacheMap(String name, String key) {

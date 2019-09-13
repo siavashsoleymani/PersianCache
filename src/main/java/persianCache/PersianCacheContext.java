@@ -14,7 +14,6 @@ public class PersianCacheContext {
     private static ZMQ.Socket publisher;
     private static ZMQ.Socket subscriber;
     private static ZMQ.Socket requester;
-    private static ZContext zContext;
     private static PersianCacheContext INSTANCE = null;
     private static GateWay gateWay = null;
     private static CacheMapService cacheMapService;
@@ -22,7 +21,7 @@ public class PersianCacheContext {
     private PersianCacheContext() {
         if (Objects.nonNull(INSTANCE))
             throw new IllegalStateException();
-        zContext = new ZContext();
+        ZContext zContext = new ZContext();
         publisher = zContext.createSocket(SocketType.PUB);
         subscriber = zContext.createSocket(SocketType.SUB);
         requester = zContext.createSocket(SocketType.REQ);
@@ -38,10 +37,10 @@ public class PersianCacheContext {
 
     public static CacheMap getCacheMap(String name) {
         initialize();
-        CacheMap cacheMap = cacheMapService.getCacheMap(name);
-        return cacheMap;
+        return cacheMapService.getCacheMap(name);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static void initialize() {
         if (Objects.isNull(INSTANCE))
             INSTANCE = new PersianCacheContext();
@@ -55,19 +54,19 @@ public class PersianCacheContext {
         gateWay.startInteract();
     }
 
-    public static ZMQ.Socket getPublisher() {
+    static ZMQ.Socket getPublisher() {
         if (Objects.isNull(INSTANCE))
             throw new IllegalStateException("First initialize PersianContext");
         return publisher;
     }
 
-    public static ZMQ.Socket getSubscriber() {
+    static ZMQ.Socket getSubscriber() {
         if (Objects.isNull(INSTANCE))
             throw new IllegalStateException("First initialize PersianContext");
         return subscriber;
     }
 
-    public static ZMQ.Socket getRequester() {
+    static ZMQ.Socket getRequester() {
         if (Objects.isNull(INSTANCE))
             throw new IllegalStateException("First initialize PersianContext");
         return requester;

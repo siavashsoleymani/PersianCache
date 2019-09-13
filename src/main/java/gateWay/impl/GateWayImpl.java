@@ -22,7 +22,7 @@ public class GateWayImpl implements GateWay {
 
     private static GateWay INSTANCE = null;
 
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     private GateWayImpl(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
         if (Objects.nonNull(INSTANCE))
@@ -39,6 +39,7 @@ public class GateWayImpl implements GateWay {
         return INSTANCE;
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void startInteract() {
         ExecutorService service = Executors.newSingleThreadExecutor();
@@ -61,6 +62,7 @@ public class GateWayImpl implements GateWay {
         });
     }
 
+    @SuppressWarnings("LoopStatementThatDoesntLoop")
     @Override
     public void fillCacheMapForFirstTime() {
         ExecutorService service = Executors.newSingleThreadExecutor();
