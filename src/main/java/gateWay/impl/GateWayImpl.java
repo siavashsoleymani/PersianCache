@@ -20,13 +20,23 @@ public class GateWayImpl implements GateWay {
     private final ZMQ.Socket publisher;
     private final CacheMapService cacheMapService;
 
+    private static GateWay INSTANCE = null;
+
     private static Gson gson = new Gson();
 
-    public GateWayImpl(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
+    private GateWayImpl(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
+        if (Objects.nonNull(INSTANCE))
+            throw new IllegalStateException();
         this.subscriber = subscriber;
         this.requester = requester;
         this.publisher = publisher;
         this.cacheMapService = new CacheMapServiceImpl();
+    }
+
+    public static GateWay getGateWay(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
+        if (Objects.isNull(INSTANCE))
+            INSTANCE = new GateWayImpl(subscriber, requester, publisher);
+        return INSTANCE;
     }
 
     @Override

@@ -10,15 +10,9 @@ public class CacheMap extends ConcurrentHashMap<String, String> {
     private final GateWay gateWay;
     private final String name;
 
-    public CacheMap(GateWay gateWay, String name) {
-        super();
-        this.gateWay = gateWay;
-        this.name = name;
-    }
-
     public CacheMap(String name) {
         super();
-        this.gateWay = new GateWayImpl(PersianCacheContext.getSubscriber(),
+        this.gateWay = GateWayImpl.getGateWay(PersianCacheContext.getSubscriber(),
                 PersianCacheContext.getRequester(),
                 PersianCacheContext.getPublisher());
         this.name = name;
