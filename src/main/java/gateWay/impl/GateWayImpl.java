@@ -2,6 +2,7 @@ package gateWay.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import discovery.Node;
 import gateWay.GateWay;
 import org.zeromq.ZMQ;
 import persianCache.CacheMap;
@@ -92,6 +93,11 @@ public class GateWayImpl implements GateWay {
         publisher.send("rm", ZMQ.SNDMORE);
         publisher.send(name, ZMQ.SNDMORE);
         publisher.send(o.toString(), 0);
+    }
+
+    @Override
+    public void pushUpdate(Node node) {
+
     }
 
 }

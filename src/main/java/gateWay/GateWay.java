@@ -1,5 +1,7 @@
 package gateWay;
 
+import discovery.Node;
+
 public interface GateWay {
     void startInteract();
 
@@ -8,4 +10,6 @@ public interface GateWay {
     void sendPutMessage(String key, String value, String name);
 
     void sendRemoveMessage(Object o, String name);
+
+    void pushUpdate(Node node);
 }
