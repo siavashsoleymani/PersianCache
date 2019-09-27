@@ -13,4 +13,6 @@ public interface CacheMapService {
     CacheMap getCacheMap(String name);
 
     void appendToLocalCache(Map<String, CacheMap> cacheFromNetwork);
+
+    Map<String, CacheMap> getCaches();
 }

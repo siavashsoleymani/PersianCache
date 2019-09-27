@@ -1,42 +1,34 @@
 package gateWay.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import discovery.Node;
 import gateWay.GateWay;
+import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
-import persianCache.CacheMap;
+import persianCache.PersianCacheContext;
 import service.CacheMapService;
 import service.impl.CacheMapServiceImpl;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GateWayImpl implements GateWay {
 
-    private final ZMQ.Socket subscriber;
-    private final ZMQ.Socket requester;
-    private final ZMQ.Socket publisher;
+    private final ZMQ.Socket puller;
     private final CacheMapService cacheMapService;
 
     private static GateWay INSTANCE = null;
 
-    private static final Gson gson = new Gson();
-
-    private GateWayImpl(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
+    private GateWayImpl(ZMQ.Socket puller) {
         if (Objects.nonNull(INSTANCE))
             throw new IllegalStateException();
-        this.subscriber = subscriber;
-        this.requester = requester;
-        this.publisher = publisher;
+        this.puller = puller;
         this.cacheMapService = new CacheMapServiceImpl();
     }
 
-    public static GateWay getGateWay(ZMQ.Socket subscriber, ZMQ.Socket requester, ZMQ.Socket publisher) {
+    public static GateWay getGateWay(ZMQ.Socket puller) {
         if (Objects.isNull(INSTANCE))
-            INSTANCE = new GateWayImpl(subscriber, requester, publisher);
+            INSTANCE = new GateWayImpl(puller);
         return INSTANCE;
     }
 
@@ -46,58 +38,45 @@ public class GateWayImpl implements GateWay {
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.submit(() -> {
             while (true) {
-                String recv = subscriber.recvStr(0);
-                if (Objects.nonNull(recv)) {
-                    if (recv.equals("pt")) {
-                        String name = subscriber.recvStr(0);
-                        String key = subscriber.recvStr(0);
-                        String value = subscriber.recvStr(0);
-                        cacheMapService.putToLocalCacheMap(name, key, value);
-                    } else if (recv.equals("rm")) {
-                        String name = subscriber.recvStr(0);
-                        String key = subscriber.recvStr(0);
-                        cacheMapService.removeFromLocalCacheMap(name, key);
-                    }
+                String recv = new String(puller.recv(0), ZMQ.CHARSET).trim();
+                if (recv.equals("pt")) {
+                    String name = new String(puller.recv(0), ZMQ.CHARSET).trim();;
+                    String key = new String(puller.recv(0), ZMQ.CHARSET).trim();;
+                    String value = new String(puller.recv(0), ZMQ.CHARSET).trim();;
+                    cacheMapService.putToLocalCacheMap(name, key, value);
+                } else if (recv.equals("rm")) {
+                    String name = new String(puller.recv(0), ZMQ.CHARSET).trim();;
+                    String key = new String(puller.recv(0), ZMQ.CHARSET).trim();;
+                    cacheMapService.removeFromLocalCacheMap(name, key);
                 }
             }
         });
     }
 
-    @SuppressWarnings("LoopStatementThatDoesntLoop")
     @Override
-    public void fillCacheMapForFirstTime() {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        service.submit(() -> {
-            while (true) {
-                requester.send("hello".getBytes(), 0);
-                String message = requester.recvStr(0);
-                Map<String, CacheMap> cacheFromNetwork =
-                        gson.fromJson(message, new TypeToken<Map<String, CacheMap>>() {
-                        }.getType());
-                cacheMapService.appendToLocalCache(cacheFromNetwork);
-                break;
-            }
-        });
+    public void sendPutMessage(String key, String value, String name, Node node) {
+        ZMQ.Socket pusher = PersianCacheContext.getzContext().createSocket(SocketType.PUSH);
+        pusher.connect("tcp://" + node.getIp() + ":" + node.getPort());
+        pusher.send("pt", ZMQ.SNDMORE);
+        pusher.send(name, ZMQ.SNDMORE);
+        pusher.send(key, ZMQ.SNDMORE);
+        pusher.send(value, 0);
     }
 
     @Override
-    public void sendPutMessage(String key, String value, String name) {
-        publisher.send("pt", ZMQ.SNDMORE);
-        publisher.send(name, ZMQ.SNDMORE);
-        publisher.send(key, ZMQ.SNDMORE);
-        publisher.send(value, 0);
-    }
-
-    @Override
-    public void sendRemoveMessage(Object o, String name) {
-        publisher.send("rm", ZMQ.SNDMORE);
-        publisher.send(name, ZMQ.SNDMORE);
-        publisher.send(o.toString(), 0);
+    public void sendRemoveMessage(Object o, String name, Node node) {
+        ZMQ.Socket pusher = PersianCacheContext.getzContext().createSocket(SocketType.PUSH);
+        pusher.connect("tcp://" + node.getIp() + ":" + node.getPort());
+        pusher.send("rm", ZMQ.SNDMORE);
+        pusher.send(name, ZMQ.SNDMORE);
+        pusher.send(o.toString(), 0);
     }
 
     @Override
     public void pushUpdate(Node node) {
-
+        cacheMapService.getCaches().forEach((name, cacheMap) -> cacheMap.forEach((k, v) -> {
+            PersianCacheContext.getGeev().allNodes().forEach(n -> sendPutMessage(k, v, name, n));
+        }));
     }
 
 }

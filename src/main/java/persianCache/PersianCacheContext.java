@@ -20,35 +20,31 @@ import java.util.Enumeration;
 import java.util.Objects;
 
 public class PersianCacheContext {
-    private static ZMQ.Socket publisher;
-    private static ZMQ.Socket subscriber;
-    private static ZMQ.Socket requester;
+    private static ZMQ.Socket puller;
     private static PersianCacheContext INSTANCE = null;
     private static GateWay gateWay = null;
     private static CacheMapService cacheMapService;
     private static Geev geev;
+    private static ZContext zContext;
 
-    private PersianCacheContext() throws IOException {
+    private PersianCacheContext(Integer port, Integer discoveryPort) throws IOException {
         if (Objects.nonNull(INSTANCE))
             throw new IllegalStateException();
-        ZContext zContext = new ZContext();
-        publisher = zContext.createSocket(SocketType.PUB);
-        subscriber = zContext.createSocket(SocketType.SUB);
-        requester = zContext.createSocket(SocketType.REQ);
-        publisher.connect("tcp://localhost:8080");
-        subscriber.connect("tcp://localhost:8081");
-        requester.connect("tcp://localhost:8082");
-        subscriber.subscribe("".getBytes(ZMQ.CHARSET));
-        gateWay = GateWayImpl.getGateWay(subscriber, requester, publisher);
+        zContext = new ZContext();
+        puller = zContext.createSocket(SocketType.PULL);
+        puller.bind("tcp://*:" + port);
         cacheMapService = new CacheMapServiceImpl();
+        gateWay = GateWayImpl.getGateWay(puller);
         geev = new Geev(new GeevConfig.Builder()
                 .useBroadcast()
-                .onJoin(node -> gateWay.pushUpdate(node))
+                .onJoin(node -> {
+                    System.out.println("some body come to network");
+                    gateWay.pushUpdate(node);
+                })
                 .onLeave(node -> System.out.println("node " + node.toString() + " was leave!"))
-                .discoveryPort(8083)
-                .setMySelf(new Node(getHostAddress(), 8081))
+                .discoveryPort(discoveryPort)
+                .setMySelf(new Node(getHostAddress(), port))
                 .build());
-        fillCacheMapForFirstTime();
         startInteracting();
     }
 
@@ -73,40 +69,29 @@ public class PersianCacheContext {
     }
 
     public static CacheMap getCacheMap(String name) throws IOException {
-        initialize();
+        if (Objects.isNull(INSTANCE))
+            throw new IllegalStateException("First initialize PersianContext");
         return cacheMapService.getCacheMap(name);
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static void initialize() throws IOException {
+    public static void initialize(Integer port, Integer discoveryPort) throws IOException {
         if (Objects.isNull(INSTANCE))
-            INSTANCE = new PersianCacheContext();
-    }
-
-    private void fillCacheMapForFirstTime() {
-        gateWay.fillCacheMapForFirstTime();
+            INSTANCE = new PersianCacheContext(port, discoveryPort);
     }
 
     private void startInteracting() {
         gateWay.startInteract();
     }
 
-    static ZMQ.Socket getPublisher() {
+    static ZMQ.Socket getPuller() {
         if (Objects.isNull(INSTANCE))
             throw new IllegalStateException("First initialize PersianContext");
-        return publisher;
+        return puller;
     }
 
-    static ZMQ.Socket getSubscriber() {
-        if (Objects.isNull(INSTANCE))
-            throw new IllegalStateException("First initialize PersianContext");
-        return subscriber;
-    }
-
-    static ZMQ.Socket getRequester() {
-        if (Objects.isNull(INSTANCE))
-            throw new IllegalStateException("First initialize PersianContext");
-        return requester;
+    public static ZContext getzContext() {
+        return zContext;
     }
 
     public static Geev getGeev() {

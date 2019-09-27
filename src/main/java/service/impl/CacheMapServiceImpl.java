@@ -48,4 +48,9 @@ public class CacheMapServiceImpl implements CacheMapService {
             }
         }
     }
+
+    @Override
+    public Map<String, CacheMap> getCaches() {
+        return caches;
+    }
 }

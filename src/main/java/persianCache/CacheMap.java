@@ -12,25 +12,25 @@ public class CacheMap extends ConcurrentHashMap<String, String> {
 
     public CacheMap(String name) {
         super();
-        this.gateWay = GateWayImpl.getGateWay(PersianCacheContext.getSubscriber(),
-                PersianCacheContext.getRequester(),
-                PersianCacheContext.getPublisher());
+        this.gateWay = GateWayImpl.getGateWay(PersianCacheContext.getPuller());
         this.name = name;
     }
 
 
     @Override
     public String remove(Object key) {
-        if (Objects.nonNull(this.get(key)))
-            gateWay.sendRemoveMessage(key, name);
+        if (Objects.nonNull(this.get(key))) {
+            PersianCacheContext.getGeev().allNodes().forEach(n -> gateWay.sendRemoveMessage(key, name, n));
+        }
         return super.remove(key);
     }
 
     @Override
     public String put(String key, String value) {
         if (Objects.isNull(this.get(key)) ||
-                (Objects.nonNull(this.get(key)) && !this.get(key).equals(value)))
-            gateWay.sendPutMessage(key, value, name);
+                (Objects.nonNull(this.get(key)) && !this.get(key).equals(value))) {
+            PersianCacheContext.getGeev().allNodes().forEach(n -> gateWay.sendPutMessage(key, value, name, n));
+        }
         return super.put(key, value);
     }
 

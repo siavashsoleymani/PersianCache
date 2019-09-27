@@ -1,11 +1,13 @@
 import persianCache.CacheMap;
 import persianCache.PersianCacheContext;
 
+import java.io.IOException;
 import java.util.Random;
 
 @SuppressWarnings({"InfiniteLoopStatement"})
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        PersianCacheContext.initialize(8082, 8083);
         CacheMap first = PersianCacheContext.getCacheMap("first");
         while (true) {
             first.put("salam" + new Random().nextInt(10), "siavash");
