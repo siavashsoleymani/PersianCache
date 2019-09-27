@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -40,7 +41,7 @@ import java.util.logging.Logger;
 public class Geev {
     public static final Logger log = Logger.getLogger(Geev.class.getName());
     public static final int DEFAULT_DISCOVERY_PORT = 5172;
-    private static final Charset ASCII = Charset.forName("US-ASCII");
+    private static final Charset ASCII = StandardCharsets.US_ASCII;
     private static final byte[] PROTOCOL_NAME = "RBND".getBytes(ASCII);
     private static final byte PROTOCOL_VERSION = 0x01;
     private static final byte JOIN = 0x01;
